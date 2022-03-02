@@ -57,6 +57,16 @@ print(tokenizer.batch_decode(output))
 <br>
 
 ### 4. Model Parallelism
+[UPDATE] `Parallelformers` has been released. Please refer to https://github.com/tunib-ai/parallelformers
+MegatronPolicy has been defined in the library code. You may use the following snippet to parallelize Megatron-11B:
+```python
+from megatron_11b.megatron_policy import MegatronPolicy
+from parallelformers import parallelize
+
+parallelize(model, num_gpus=2, fp16=True, verbose='detail', custom_policies=MegatronPolicy)
+```
+
+[ORIGINAL]
 - Currently, I'm preparing an opensource called `Parallelformers` that can parallelize all models of Huggingface Transformers. 
 - I plan to support model parallelization through this library. (maybe I can release it next month)
 - The relevant code can be found via `MegatronPolicy` object below.
@@ -75,7 +85,7 @@ class MegatronPolicy(Policy):
             "self_attn.embed_dim": config.d_model // world_size,
 
             # 2. reduce number of heads
-            "self_attn.num_heads": config.encoder_attention_heads // world_size,
+            "self_attn.num_heads": config.decoder_attention_heads // world_size,
         }
 
     @staticmethod
